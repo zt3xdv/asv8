@@ -5,6 +5,8 @@ The kernel can execute aarch64 binaries but the userland ships no aarch64 loader
 
 asv8 is a single static armv7 binary with everything inside: the aarch64 musl loader, the Alpine Linux libraries, and a preload library (dns64 + shield)
 
+The best part: it runs **natively**
+
 ## Usage
 
 ```sh
