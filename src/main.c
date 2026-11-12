@@ -22,6 +22,7 @@ static int g_argc;
 static char **g_argv;
 static char **g_envp;
 static char *g_xargv[4200];
+static char *g_xenvp[4200];
 
 __attribute__((naked)) void _start(void)
 {
@@ -286,7 +287,16 @@ void c_entry(unsigned long *sp)
     for (int i = 2; i < g_argc; i++) g_xargv[4 + i] = g_argv[i];
     g_xargv[g_argc + 4] = 0;
 
-    long r = sys3(SYS_EXECVE, (long)loader, (long)g_xargv, (long)g_envp);
+    int envc = 0;
+    for (; g_envp[envc]; envc++);
+    for (int i = 0; i < envc; i++) g_xenvp[i] = g_envp[i];
+    static char asv8_argv0[4096];
+    scpy(asv8_argv0, "ASV8_TARGET=");
+    scat(asv8_argv0, target);
+    g_xenvp[envc] = asv8_argv0;
+    g_xenvp[envc + 1] = 0;
+
+    long r = sys3(SYS_EXECVE, (long)loader, (long)g_xargv, (long)g_xenvp);
     if (r < 0)
         die("execve failed: ", target, 126);
     sys1(SYS_EXIT, 0);
